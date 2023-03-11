@@ -26,8 +26,9 @@ func main() {
 		})
 	})
 	r.GET("/chat", ws.WsChat)
-	r.GET("/echo", ws.Echo)
-	r.GET("/home", ws.Home)
 	r.Static("/static", "./static")
+	r.GET("/", func(c *gin.Context) {
+		http.Redirect(c.Writer, c.Request, "/static/", http.StatusTemporaryRedirect)
+	})
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

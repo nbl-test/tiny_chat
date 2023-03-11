@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/BeanLiu1994/tiny_chat/chat"
@@ -12,6 +13,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+} // use default options
 
 type WsSession struct {
 	c           *gin.Context
