@@ -4,6 +4,8 @@ let default_message = {
     to: "uuid",
     sent_time: "xxxx",
     content: "content",
+    // calculated
+    is_public: true, //false,
 }
 let default_model = {
     messages: [], // [message]
@@ -17,15 +19,27 @@ let model = {
     messages: [],
 }
 
+let message_callback = {
+    on_add_msg: null,
+    on_reset_msg: null,
+}
+
 function reset_messages() {
     Object.assign(model, default_model)
 
     console.log(model)
     console.log(default_model)
+    if (message_callback.on_reset_msg) {
+        message_callback.on_reset_msg()
+    }
 }
 
 function add_message(message) {
+    message.is_public = message.to?.length == 0;
     model.messages.push(message)
+    if (message_callback.on_add_msg) {
+        message_callback.on_add_msg(message)
+    }
 }
 
 function get_messages(skip_public, offset, count) {
@@ -51,6 +65,60 @@ function get_messages(skip_public, offset, count) {
         }
     }
     return ret
+}
+
+// returns close function
+// events must provides: {onopen, onmessage, onerror, onclose}
+function init_ws(url, events) {
+    const ws = new WebSocket(url);
+    if (events) {
+        let e = ()=>{}
+        ws.onopen = (event) => {
+            console.log(event);
+            (events['onopen']||e)(event)
+        };
+        ws.onmessage = (event) => {
+            console.log(event.data);
+            (events['onmessage']||e)(event)
+        }
+        ws.onerror = (event) => {
+            console.log(event);
+            (events['onerror']||e)(event)
+        }
+        ws.onclose = (event) => {
+            console.log(event);
+            (events['onclose']||e)(event)
+        }
+    }
+    return () => {
+        ws.close();
+    }
+}
+
+function init_message_ws() {
+    const url = new URL('/chat', location.href);
+    url.protocol = 'wss';
+    return init_ws(url, {
+        'onopen': (event)=>{
+            reset_messages();
+        },
+        'onmessage': (event)=>{
+            let msg = JSON.parse(event.data)
+            if ('error' in msg) {
+                alert('error occured: ' + msg)
+                return
+            }
+            if ('content' in msg && 'from' in msg) {
+                add_message(msg)
+            }
+        },
+        'onerror': (event)=>{
+            
+        },
+        'onclose': (event)=>{
+            
+        },
+    })
 }
 
 // export {add_message, get_messages, reset_messages}
