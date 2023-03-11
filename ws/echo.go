@@ -3,13 +3,18 @@ package ws
 import (
 	_ "embed"
 	"log"
+	"net/http"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
-var upgrader websocket.Upgrader // use default options
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+} // use default options
 
 func Echo(c *gin.Context) {
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)

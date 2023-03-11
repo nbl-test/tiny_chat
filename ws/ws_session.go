@@ -29,14 +29,14 @@ func (s *WsSession) Created() time.Time {
 }
 func (s *WsSession) Send(b []byte) {
 	ch := s.sendChannel
-	if ch != nil {
+	if ch == nil {
 		return
 	}
 	ch <- string(b)
 }
 func (s *WsSession) SendString(str string) {
 	ch := s.sendChannel
-	if ch != nil {
+	if ch == nil {
 		return
 	}
 	ch <- str
@@ -72,9 +72,11 @@ func WsChat(c *gin.Context) {
 
 	// record session
 	sess := &WsSession{
-		c:       c,
-		ws:      ws,
-		created: time.Now(),
+		c:           c,
+		ws:          ws,
+		created:     time.Now(),
+		sessName:    sessName,
+		sendChannel: sendChannel,
 	}
 	defer sess.stopChannel()
 	defer session.DefaultSessionManager.Set(sessName, nil)
@@ -92,7 +94,6 @@ func WsChat(c *gin.Context) {
 		if mt != websocket.TextMessage {
 			continue
 		}
-		log.Printf("%v says: %s", sessName, message)
 		type tmpStruct struct {
 			To      string `json:"to"`
 			Content string `json:"content"`

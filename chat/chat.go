@@ -2,6 +2,7 @@ package chat
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/BeanLiu1994/tiny_chat/session"
@@ -50,6 +51,7 @@ func (c *ChatManager) Say(from, to, what string) {
 		c.Broadcast(m)
 		return
 	}
+	log.Printf("%v says: %s", m.Sender, m.Content)
 	b, _ := json.Marshal(m)
 	toSess := c.sessMgr.Get(to)
 	fromSess := c.sessMgr.Get(from)
@@ -62,6 +64,7 @@ func (c *ChatManager) Say(from, to, what string) {
 }
 
 func (c *ChatManager) Broadcast(m Message) {
+	log.Printf("%v says to ALL: %s", m.Sender, m.Content)
 	b, _ := json.Marshal(m)
 	c.addCache(string(b))
 	c.sessMgr.ForEach(func(name string, sess session.SessionInterface) {
