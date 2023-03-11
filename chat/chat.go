@@ -43,15 +43,16 @@ func (c *ChatManager) OnDisconnect(who string) {
 
 func (c *ChatManager) Say(from, to, what string) {
 	m := Message{
-		Sender:   from,
+		From:     from,
 		SentTime: time.Now(),
 		Content:  what,
+		To:       to,
 	}
 	if to == "" {
 		c.Broadcast(m)
 		return
 	}
-	log.Printf("%v says: %s", m.Sender, m.Content)
+	log.Printf("%v says: %s", m.From, m.Content)
 	b, _ := json.Marshal(m)
 	toSess := c.sessMgr.Get(to)
 	fromSess := c.sessMgr.Get(from)
@@ -64,7 +65,7 @@ func (c *ChatManager) Say(from, to, what string) {
 }
 
 func (c *ChatManager) Broadcast(m Message) {
-	log.Printf("%v says to ALL: %s", m.Sender, m.Content)
+	log.Printf("%v says to ALL: %s", m.From, m.Content)
 	b, _ := json.Marshal(m)
 	c.addCache(string(b))
 	c.sessMgr.ForEach(func(name string, sess session.SessionInterface) {
@@ -113,7 +114,8 @@ func (c *ChatManager) KeepAlive() chan bool {
 
 // cache public message only
 type Message struct {
-	Sender   string    `json:"sender"`
+	From     string    `json:"from"`
+	To       string    `json:"to,omitempty"`
 	SentTime time.Time `json:"sent_time"`
 	Content  string    `json:"content"`
 }
