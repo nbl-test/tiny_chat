@@ -1,0 +1,30 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+  # mongo:
+  #   hostname: mongo
+  #   image: mongo:4.4
+  #   container_name: mongo
+  #   restart: always
+  #   ports:
+  #     - 27017
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: example
+  #   volumes:
+  #     - ./mongo_data:/data/db
+  #     - ./mongo_dump:/dump
+
+  beanchat:
+    hostname: beanchat
+    build: .
+    container_name: beanchat 
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - GIN_MODE=release
+      #   MONGO_URL: mongodb://mongo:27017/beanchat
+      # depends_on:
+      #   - mongo
