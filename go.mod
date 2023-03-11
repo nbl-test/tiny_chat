@@ -1,4 +1,4 @@
-module hello_server
+module github.com/BeanLiu1994/tiny_chat
 
 go 1.20
 
