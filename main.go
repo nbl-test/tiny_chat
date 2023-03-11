@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/BeanLiu1994/tiny_chat/chat"
 	"github.com/BeanLiu1994/tiny_chat/ws"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,10 @@ import (
 func main() {
 	// log flags
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
+
+	// keepalive
+	done := chat.DefaultChatManager.KeepAlive()
+	defer close(done)
 
 	// set server
 	r := gin.Default()

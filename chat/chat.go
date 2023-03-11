@@ -93,6 +93,24 @@ func (c *ChatManager) getCache() []string {
 	return c.cache.Keys()
 }
 
+func (c *ChatManager) KeepAlive() chan bool {
+	ticker := time.NewTicker(30 * time.Second)
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				c.sessMgr.ForEach(func(name string, sess session.SessionInterface) {
+					sess.SendString(`{"_": "heartbeat"}`)
+				})
+			}
+		}
+	}()
+	return done
+}
+
 // cache public message only
 type Message struct {
 	Sender   string    `json:"sender"`

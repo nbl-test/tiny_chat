@@ -84,6 +84,9 @@ func WsChat(c *gin.Context) {
 	log.Println(sessName, "connected")
 	defer log.Println(sessName, "disconnected")
 
+	// init send global msg
+	chat.DefaultChatManager.OnConnect(sessName)
+
 	// read loop
 	for {
 		mt, message, err := ws.ReadMessage()
