@@ -1,9 +1,10 @@
 package main
 
 import (
-	"hello_server/ws"
 	"log"
 	"net/http"
+
+	"github.com/BeanLiu1994/tiny_chat/ws"
 
 	"github.com/gin-gonic/gin"
 )

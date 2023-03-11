@@ -2,8 +2,9 @@ package chat
 
 import (
 	"encoding/json"
-	"hello_server/session"
 	"time"
+
+	"github.com/BeanLiu1994/tiny_chat/session"
 
 	lru "github.com/hashicorp/golang-lru/v2"
 )

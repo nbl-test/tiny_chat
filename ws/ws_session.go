@@ -3,10 +3,11 @@ package ws
 import (
 	_ "embed"
 	"encoding/json"
-	"hello_server/chat"
-	"hello_server/session"
 	"log"
 	"time"
+
+	"github.com/BeanLiu1994/tiny_chat/chat"
+	"github.com/BeanLiu1994/tiny_chat/session"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
