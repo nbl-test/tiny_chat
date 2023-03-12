@@ -302,25 +302,25 @@
       var hourC = diffValue / hour;
       var minC = diffValue / minute;
       if (monthC > 1) {
-        result = "" + parseInt(monthC) + "monthes ago";
+        result = "" + parseInt(monthC) + " monthes ago";
       } else if (monthC == 1) {
-        result = "" + parseInt(monthC) + "month agg";
+        result = "" + parseInt(monthC) + " month agg";
       } else if (weekC > 1) {
-        result = "" + parseInt(weekC) + "weeks ago";
+        result = "" + parseInt(weekC) + " weeks ago";
       } else if (weekC == 1) {
-        result = "" + parseInt(weekC) + "week ago";
+        result = "" + parseInt(weekC) + " week ago";
       } else if (dayC > 1) {
-        result = "" + parseInt(dayC) + "days ago";
+        result = "" + parseInt(dayC) + " days ago";
       } else if (dayC == 1) {
-        result = "" + parseInt(dayC) + "day ago";
+        result = "" + parseInt(dayC) + " day ago";
       } else if (hourC > 1) {
-        result = "" + parseInt(hourC) + "hours ago";
+        result = "" + parseInt(hourC) + " hours ago";
       } else if (hourC == 1) {
-        result = "" + parseInt(hourC) + "hour ago";
+        result = "an hour ago";
       } else if (minC > 1) {
-        result = "" + parseInt(minC) + "minutes ago";
+        result = "" + parseInt(minC) + " minutes ago";
       } else if (minC == 1) {
-        result = "" + parseInt(minC) + "minute ago";
+        result = "a minute ago";
       } else {
         result = "just now";
       }
