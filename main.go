@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/BeanLiu1994/tiny_chat/chat"
 	"github.com/BeanLiu1994/tiny_chat/ws"
@@ -18,6 +19,26 @@ func main() {
 	// keepalive
 	done := chat.DefaultChatManager.KeepAlive()
 	defer close(done)
+
+	// self activator
+	serveUrl := os.Getenv("SERVE_URL")
+	if serveUrl != "" {
+		done2 := make(chan bool)
+		go func(done chan bool) {
+			ticker := time.NewTicker(10 * time.Minute)
+			go func() {
+				for {
+					select {
+					case <-done:
+						return
+					case <-ticker.C:
+						http.Get(serveUrl)
+					}
+				}
+			}()
+		}(done2)
+		defer close(done2)
+	}
 
 	// set server
 	r := gin.Default()
