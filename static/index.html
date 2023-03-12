@@ -13,27 +13,38 @@
       top: 0px;
       left: 0px;
       right: 0px;
-      height: 100px;
+      height: 120px;
       width: 100%;
       z-index: 10;
       margin: 0px 1px;
       overflow: hidden;
-      backdrop-filter:blur(6px);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      -moz-backdrop-filter: blur(6px);
     }
-    .height-placeholder{
-      height: 100px;
+
+    .height-placeholder {
+      height: 120px;
       width: 100%;
     }
+
+    .small-font {
+      font-size: xx-small;
+    }
+
     .title-inactive {
       color: crimson;
     }
+
     .title-active {
       color: lightgreen;
     }
-    .history-div{
-      overflow:hidden;
+
+    .history-div {
+      overflow: hidden;
     }
-    .history-list{
+
+    .history-list {
       overflow: scroll;
     }
 
@@ -50,11 +61,13 @@
       margin-top: 60px;
       margin-bottom: 10px;
     }
+
     .chat li {
       padding: 0.5rem;
       overflow: hidden;
       display: flex;
     }
+
     .chat .avatar {
       width: 40px;
       height: 40px;
@@ -66,6 +79,7 @@
       -moz-border-radius: 100%;
       -ms-border-radius: 100%;
     }
+
     .default_avator {
       width: 40px;
       height: 40px;
@@ -80,6 +94,7 @@
       -moz-user-select: none;
       -ms-user-select: none;
     }
+
     .me_avator {
       width: 40px;
       height: 40px;
@@ -94,6 +109,7 @@
       -moz-user-select: none;
       -ms-user-select: none;
     }
+
     .public_avator {
       width: 40px;
       height: 40px;
@@ -113,6 +129,7 @@
       order: 1;
       border-top-left-radius: 0px;
     }
+
     .other:before {
       content: "";
       position: relative;
@@ -130,10 +147,12 @@
       justify-content: flex-end;
       align-items: flex-end;
     }
+
     .self .msg {
       order: 1;
       border-bottom-right-radius: 0px;
     }
+
     .self .avatar {
       order: 2;
     }
@@ -158,11 +177,13 @@
       padding: 10px;
       border-radius: 2px;
     }
+
     .msg p {
       font-size: 0.8rem;
       margin: 0 0 0.2rem 0;
       color: #ccc;
     }
+
     .msg time {
       font-size: 0.7rem;
       color: #777;
@@ -174,6 +195,7 @@
       -moz-user-select: none;
       -ms-user-select: none;
     }
+
     .msg time:before {
       content: "\f017";
       color: #ddd;
@@ -194,9 +216,11 @@
       margin: 0px 1px;
       overflow: hidden;
     }
+
     .submit-btn {
       width: 80px;
     }
+
     .text-input {
       height: 100%;
       margin-right: 1px;
@@ -206,20 +230,19 @@
 </head>
 
 <body>
-  <div class="border-bottom pt-3 menu-div">
+  <div class="border-bottom border-1 pt-3 menu-div">
     <h1 id="title" class="text-center title-inactive">Tell <-\\-> Tell</h1>
     <p class="p-1 text-center">
       You're: <a class="text" id="name">unknown</a>
+      <a class="text small-font" href="/static/info.html" target="_blank">ABOUT</a>
     </p>
   </div>
   <div id="input-div" class="input-div input-group">
-    <input id="msg-input" type="text" class="border-0 text-input" placeholder="Type here!"/>
+    <input id="msg-input" type="text" class="border-0 text-input" placeholder="Type here!" />
     <button type="button" class="btn btn-primary submit-btn" onclick="send_message()">Submit</button>
   </div>
   <div class="history-div">
     <div class="height-placeholder"></div>
-    <div class="container-fluid history-list">
-  </div>
     <ol id="chat-list" class="chat">
     </ol>
   </div>
@@ -257,41 +280,41 @@
   <script src="js/ws.js"></script>
   <script>
     // 平滑的滚动到底部
-    const scrollToBottom = (element) => 
+    const scrollToBottom = (element) =>
       element.scrollIntoView({ behavior: "smooth", block: "end" });
     // list
     const list = document.getElementById("chat-list");
     function reset_table() {
       list.replaceChildren()
     }
-    function _get_time_diff(dateTimeStamp){
-    	var minute = 1000 * 60;
-    	var hour = minute * 60;
-    	var day = hour * 24;
-    	var halfamonth = day * 15;
-    	var month = day * 30;
-    	var now = new Date().getTime();
-    	var diffValue = now - dateTimeStamp;
-    	if(diffValue < 0){return;}
-    	var monthC =diffValue/month;
-    	var weekC =diffValue/(7*day);
-    	var dayC =diffValue/day;
-    	var hourC =diffValue/hour;
-    	var minC =diffValue/minute;
-    	if(monthC>=1){
-    		result="" + parseInt(monthC) + "月前";
-    	}else if(weekC>=1){
-    		result="" + parseInt(weekC) + "周前";
-    	}else if(dayC>=1){
-    		result=""+ parseInt(dayC) +"天前";
-    	}else if(hourC>=1){
-    		result=""+ parseInt(hourC) +"小时前";
-    	}else if(minC>=1){
-    		result=""+ parseInt(minC) +"分钟前";
-    	}else{
-        result="刚刚";
+    function _get_time_diff(dateTimeStamp) {
+      var minute = 1000 * 60;
+      var hour = minute * 60;
+      var day = hour * 24;
+      var halfamonth = day * 15;
+      var month = day * 30;
+      var now = new Date().getTime();
+      var diffValue = now - dateTimeStamp;
+      if (diffValue < 0) { return; }
+      var monthC = diffValue / month;
+      var weekC = diffValue / (7 * day);
+      var dayC = diffValue / day;
+      var hourC = diffValue / hour;
+      var minC = diffValue / minute;
+      if (monthC >= 1) {
+        result = "" + parseInt(monthC) + "月前";
+      } else if (weekC >= 1) {
+        result = "" + parseInt(weekC) + "周前";
+      } else if (dayC >= 1) {
+        result = "" + parseInt(dayC) + "天前";
+      } else if (hourC >= 1) {
+        result = "" + parseInt(hourC) + "小时前";
+      } else if (minC >= 1) {
+        result = "" + parseInt(minC) + "分钟前";
+      } else {
+        result = "刚刚";
       }
-    	return result;
+      return result;
     }
     function _parse_time(timepoint) {
       let tp = new Date(timepoint)
@@ -349,7 +372,7 @@
       }
     }
 
-      
+
     // send message
     function send_message() {
       let msg = document.getElementById("msg-input")
