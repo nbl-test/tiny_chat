@@ -50,7 +50,7 @@ function reset_messages() {
 }
 
 function add_message(message) {
-    message.is_public = message.to?.length == 0;
+    message.is_public = !message.to || message.to.length == 0;
     message.sent_by_me = message.from == model.username;
     model.messages.push(message)
     if (message_callback.on_add_msg) {
