@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/BeanLiu1994/tiny_chat/chat"
 	"github.com/BeanLiu1994/tiny_chat/ws"
@@ -30,5 +31,9 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		http.Redirect(c.Writer, c.Request, "/static/", http.StatusTemporaryRedirect)
 	})
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	r.Run(":" + port) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
