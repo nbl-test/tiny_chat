@@ -26,12 +26,15 @@ type ChatManager struct {
 }
 
 func (c *ChatManager) OnConnect(who string) {
-	list := c.getCache()
-	if len(list) == 0 {
-		return
-	}
 	sess := c.sessMgr.Get(who)
 	if sess == nil {
+		return
+	}
+	sessNameNotify := map[string]string{"name": who}
+	b, _ := json.Marshal(sessNameNotify)
+	sess.Send(b)
+	list := c.getCache()
+	if len(list) == 0 {
 		return
 	}
 	for _, v := range list {

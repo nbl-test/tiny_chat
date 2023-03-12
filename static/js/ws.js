@@ -6,22 +6,37 @@ let default_message = {
     content: "content",
     // calculated
     is_public: true, //false,
+    sent_by_me: true, // false
 }
 let default_model = {
     messages: [], // [message]
+    username: ""
 }
 let default_error = {
     error: "error_content"
+}
+let default_identity = {
+    name: "uuid"
 }
 
 // model
 let model = {
     messages: [],
+    username: ""
 }
 
 let message_callback = {
+    on_set_username: null,
     on_add_msg: null,
+    on_connection_lost: null,
     on_reset_msg: null,
+}
+
+function set_username(name) {
+    model.username = name
+    if (message_callback.on_set_username) {
+        message_callback.on_set_username(name)
+    }
 }
 
 function reset_messages() {
@@ -36,6 +51,7 @@ function reset_messages() {
 
 function add_message(message) {
     message.is_public = message.to?.length == 0;
+    message.sent_by_me = message.from == username;
     model.messages.push(message)
     if (message_callback.on_add_msg) {
         message_callback.on_add_msg(message)
@@ -65,6 +81,12 @@ function get_messages(skip_public, offset, count) {
         }
     }
     return ret
+}
+
+function connection_closed(event) {
+    if (message_callback.on_connection_lost) {
+        message_callback.on_connection_lost(event)
+    }
 }
 
 // returns close function
@@ -108,17 +130,20 @@ function init_message_ws() {
                 alert('error occured: ' + msg)
                 return
             }
+            if ('name' in msg) {
+                set_username(msg.name)
+                return
+            }
             if ('content' in msg && 'from' in msg) {
                 add_message(msg)
+                return
             }
         },
         'onerror': (event)=>{
             
         },
         'onclose': (event)=>{
-            
+            connection_closed(event)
         },
     })
 }
-
-// export {add_message, get_messages, reset_messages}
