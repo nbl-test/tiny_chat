@@ -51,7 +51,7 @@ function reset_messages() {
 
 function add_message(message) {
     message.is_public = message.to?.length == 0;
-    message.sent_by_me = message.from == username;
+    message.sent_by_me = message.from == model.username;
     model.messages.push(message)
     if (message_callback.on_add_msg) {
         message_callback.on_add_msg(message)
@@ -89,7 +89,7 @@ function connection_closed(event) {
     }
 }
 
-// returns close function
+// returns send_msg and close function
 // events must provides: {onopen, onmessage, onerror, onclose}
 function init_ws(url, events) {
     const ws = new WebSocket(url);
@@ -112,8 +112,13 @@ function init_ws(url, events) {
             (events['onclose']||e)(event)
         }
     }
-    return () => {
-        ws.close();
+    return {
+        send: (message, to)=>{
+            ws.send(JSON.stringify({content: message, to: to}))
+        }, 
+        close: () => {
+            ws.close();
+        }
     }
 }
 

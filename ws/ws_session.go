@@ -115,6 +115,11 @@ func WsChat(c *gin.Context) {
 			session.SendJsonErr(sess, "unmarshal input message failed")
 			continue
 		}
+		if tmp.Content == "" {
+			log.Println("reject empty content from", sessName)
+			session.SendJsonErr(sess, "cannot send empty msg")
+			continue
+		}
 		// send init messages
 		chat.DefaultChatManager.Say(sessName, tmp.To, tmp.Content)
 	}

@@ -1,129 +1,395 @@
 <!doctype html>
 <html lang="en" data-bs-color-scheme>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-blackbox.min.css" rel="stylesheet">
-    <title>Bootstrap demo</title>
-    <style>
-      th {
-        position: sticky;
-        top: -1px;
-      }
-      .title-inactive {
-        color: crimson;
-      }
-      .title-active {
-        color: lightgreen;
-      }
-      .fullpage {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-      }
-      .chatdiv{
-        position: fixed;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
-        height: 50px;
-        width: 100%;
-        z-index: 10;
-        font-weight: 400;
-        margin: 0px 1px;
-        overflow:hidden;
-      }
-      .submit-btn{
-        width:80px;
-      }
-      .textinput{
-        height:100%;
-        margin-right:1px;
-        width: calc(100% - 80px);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container-fluid pt-5 fullpage">
-      <h1 id="title" class="text-center title-inactive">Tell <-\\-> Tell</h1>
-      <p class="p-3 text-center">
-        You're: <a class="text" id="name">unknown</a>
-      </p>
-      <button type="button" class="btn btn-danger" onclick='add_rows([{from:"a",to:"a",sent_time:"a","content":"123"}])'>Add</button>
-      <button type="button" class="btn btn-danger" onclick="reset_table()">Clear</button>
-      <div class="pt-3 mb-5">
-        <table id="chat_msg_table" class="table table-hover table-responsive table-striped table-bordered"></table>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-blackbox.min.css" rel="stylesheet">
+  <title>Bootstrap demo</title>
+  <style>
+    .menu-div {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      height: 100px;
+      width: 100%;
+      z-index: 10;
+      margin: 0px 1px;
+      overflow: hidden;
+      backdrop-filter:blur(6px);
+    }
+    .height-placeholder{
+      height: 100px;
+      width: 100%;
+    }
+    .title-inactive {
+      color: crimson;
+    }
+    .title-active {
+      color: lightgreen;
+    }
+    .history-div{
+      overflow:hidden;
+    }
+    .history-list{
+      overflow: scroll;
+    }
+
+    th {
+      position: sticky;
+      top: -1px;
+    }
+
+    .chat {
+      list-style: none;
+      background: none;
+      margin: 0;
+      padding: 0 0 50px 0;
+      margin-top: 60px;
+      margin-bottom: 10px;
+    }
+    .chat li {
+      padding: 0.5rem;
+      overflow: hidden;
+      display: flex;
+    }
+    .chat .avatar {
+      width: 40px;
+      height: 40px;
+      position: relative;
+      display: block;
+      z-index: 2;
+      border-radius: 100%;
+      -webkit-border-radius: 100%;
+      -moz-border-radius: 100%;
+      -ms-border-radius: 100%;
+    }
+    .default_avator {
+      width: 40px;
+      height: 40px;
+      border-radius: 100%;
+      -webkit-border-radius: 100%;
+      -moz-border-radius: 100%;
+      -ms-border-radius: 100%;
+      -webkit-touch-callout: none;
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABA5JREFUaAXtWV1IVEEUPnO3VTeLiigqg9AKAtEgXcV+yCgoNTKpfYmynuqlIAwqogejJ/t7iHooCEJ9SikLwowKIyFSVyipXix7KCMiozJ3c3fndMbYpXXvXOfOXVciBy4798w53znfmTt3ztwFmGpTGfi/M8CSST/X50ubPuSpQgaViLCKwBcLfAR4zxj0MGAtw5nDLS+bmkaS5TdpBArL9+5Azs8wxnKsg8M3DOFo172Gm9Z6aqOOCfh8Pte7oel1CHhEzeUfLZqVc/7inGNQW8vt2I3VdY0V2L3PXOI9azd44YMyt3rRh0HPQN+LB3Z9/q3vaAbEYwOIzX8D2u0j8Cp/a2OLXbuovjYBsWA9QxmvKJdLo2A6v7Tg+4OZgRW6C9vQcSpsxNvGafAChxZ0dsaPjErR12naBCLAtus4NLWh166pXEGoTYABFijgK6qwQkXFBDUHBGBhApqmgBZilqYpaBPQdWhmR3uC9l6gTYBKhQGzYHRkjKE2ljYBZoBfJ1hzG+w2l48v1SdAhdn48IoaaNxW1ExQ0ybAP6XfIrS+BESbAkR8G5gRuGPTLKauTcDvvxpiiMdiSJodZrAa3V1YuHRUzFEh9nrh8pUzRGGmEz/Z1XW31l/WsY3aaM9AFGC0JGZwNnqv/otnuopzTqjrm2tqF3Nj4QrLqw9QZXqaqpt5Y8fi7/EzOT3Z1dpwNV6ud+eMQG2t4e3s30kL8RC5X0OXKh7Sya2D9C91FWU3OznUqDpMSI93c/UmNPA8xZyfMGhDQOX0c0pATU9rwyMbZjFV2wRKfD5PaMhTRwgH6bJtH/Mc36GNHS7ODBjH29uvB+OHrO9sBZBXsWtOOp8m3tlrrWE1Rzk8M8JQ0fmw/osqgjKBoo3VcyNp+Jg+jeSqgmvpIfS60V36tO3aoIq90mu0oGC/m7uxacKDFxEzyAu7wi3Lyg6lJ40Amx+8AIxtUAFMhg4t6nWz4ZvS3jLuI1S0pbqEA3YQAaXZSgaBUQykz2SIpT1tjU+sMMcLitFJ40rKgxcRU8IMg10SPW0CBWW7K8UzaQUwsWMs31u2Z6uVD8sZQDAOWxmnYow2iBorP9Lp8ZbvW4A8MkBTKdWxAk7aGK1oaln+tsaPZpjyGUDcNunBi4hFAl1GhVnwQiYlgBgplRmlWs7CfL3Mp5wAYInMKNVyKl1FpWvapAQA2SxTi8kQMi6NRUqA81DS/gZyyjnMuTQWKYFQcGSQNkOnvh3bixj4r6C0OpUSoOPh/ZHAT4iEQ9Slaj3FTfjkkTCMBIbFd8f7MvfTZAMMQqcA3b7Qr8AimU4q5LQJDRg8RGdt8yadgd6Ou18ZRMTBpYmu7+bmEyr9zjm/4TJgjYhlQj1NgU9l4B/OwG85nDanF3SQewAAAABJRU5ErkJggg==);
+      background-size: 100%;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    .me_avator {
+      width: 40px;
+      height: 40px;
+      border-radius: 100%;
+      -webkit-border-radius: 100%;
+      -moz-border-radius: 100%;
+      -ms-border-radius: 100%;
+      -webkit-touch-callout: none;
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABTVJREFUaAXtWVtoHFUY/s/MziSb3Y1NNmm6SZqYpJViRMUEmsRkwSBKRWlrQUHEN31Q8BaxWEGXCJbGekPqg0+C4ENaNPqitmKhUazaesM8SGLTNvfLbuwmu5udnZnjOZMuna5zZmfO5oKYYbNzzn++//+/b86ZM/9kATaPzSvw/74CaDXl9w8NyeUL8f0Yo70Iwx0I6bU0PsbCOEbws4jwwHxZ6cBDzc3KauVdNQHfnDl7ACO9DwA12pHDGP4SBHixu7P9Ezuc07GCBfT394vB0PYjJGGP06QUp2N89Luu9oMRMk1u/HKxQq7BbZ+HPM0hIPRC+Nuzh93my8UXNAMrywafyA3qpo8x3n93uGPAjY8Zyz0D9IbVAdOlU9AhIHiLxuINwi2A7jYIQRNv4qwfBtQQjF3Zm+27PXMLINvkPrfJWHhEtl3WWD47twCyu7fkC+50XAfU6hSbi+MWQKY+lBuMu49wDa8vtwDehFZ+CGPuZwG3AAT6pBUZLhtC3LG4Beggnucia+WE4JyV2YmNWwAtzJwkcILBOvrMCc4Kwy2gtFj6VMcwYhXUnQ1fiAUDn7vzuYbmFtDa2poRBTh4LRRfC2Hh+ULKa24BlC4tiWlVyUfd8DrSHW7jXj40QkECaABaEmOE3qBtNwepIvsGO9sOufGxwhZUjWYDkooSnfjy5Kt+2dsjy5I/a7c6K0pmKbmcOvrgfff0IkQKkgKPggQMPVnp92SUD07vPtw6n1B3aqoKwbJy48/v80NRUZFBL51Ow1JiCeYXFiC2EAXR44EKn2f4rh9eOqdK8hPN788t8ergFjDxStPD8dGJD9XUcjEOhsYHw2/WKoRoKpmCjLIMOtmizIdA3iMlWQZvSQnIRFjXmZ5xFJ2q9XiLl7c0hB4L9Y4eN+Odtl0LiEZ2lKawfkzA8KgST8Di+IyRK97YNvzrbU/vpB1KXdc0ImKlQqDkBVGEbLKW394e9l34ycAGtleBHPARLPqoSPE8Vdn356IR0OFXNqYj+Gzkxm2qKnxBbv3bsw7JmRikon8bXa2y7tL3Ha9V64IkZcfNZ1FdVtp/jEwJM5frqd1bsQVKtpabIPgXUYU9Va+PrlwV0wir6VjA3KH6UMaDBsnG9a+XmOQsETG/IgJJkpqu2nHpct0eaS64q4ImDkaH5usvfqV6Z0fqdFX1UJu3ooyQL6PN6w5S2I2IIu7aGrk4fd0Ao+NIwNhztV4xIJ8mMXYz4oCymITETBR0JcOCGHZRlsC3LQiSv8QGh8+DkA5XRyaTNiBjyLga+UCiT36PYJjkqb8cKAEp4IVMPEnEJEBNpsl9oBqhEdl1JG8RyKU+gzjZPg07+wu1APa+S8YfZ2NWRvJFgulIU7em468JMC82XzI342QjoJ97a3pHT9n52T6JcQQEXcPH1ps8JWzkxOgdyoFbwLTecIBE2mUXYC3HyEq7eQoa99nlsFVH5vAZO+d1GdPhWbs8zHU99vJNNYKojm3E8jETJv8MxpqYqa2LjFm+djJnQBTUBzaaPBVClhHyaPL9ZlHmNlMAqHrYDNzQNmZzYQoglUzHhpI2Jdc0NhemAOJfaoqxoU0E+AYWAaYAdSm5aj8DsZI7tadtuDAFJGZiMaxqTnOsGY5ySEzHoqwETAFY009eGZ2ANKn58dW6nhVkLew0J81NORACJ1k5mM+B3x+BMlDgDwKoZjmvh508TCdBhltu/RgWrPIxZ4A6kJ9GO4mA4+RhErdyXkvb1Zz9mgfuZJFfy/ybsTevwH/lCvwDYf+wjLyZY3EAAAAASUVORK5CYII=);
+      background-size: 100%;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    .public_avator {
+      width: 40px;
+      height: 40px;
+      border-radius: 100%;
+      -webkit-border-radius: 100%;
+      -moz-border-radius: 100%;
+      -ms-border-radius: 100%;
+      -webkit-touch-callout: none;
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABPJJREFUaAXtWGtoXEUUPmfuZjdL0yQbTEoQ7QNSYxWjIY2gKTE0FQvRQqGxIFKi/qoQUvHRgD/yQ1IqLdb8EAXxAfqjxgrah9omhDbV1jZpIFCbmhpsDal5rNmabPZ19x7P7eYm+7g7uZsEQuEO7M7Mdx5zvnPvnJldALvZGbAzYGfAzoCdgXs4A7jssRPhC22dLwLQXgIoj/nHXiL46ERT7dHlXi9jAt3jU8+gwAqNREiQerqqMPe6EVRLS4vo9Tz1GQDuMbCk/vPjjbWvAiJzi7Xm/p5SQfCsBpoTonD5QHnlWUNmpbdMoGtyMt+hub7lzG41HBORJlAcfrrA/Q5yUHUfdryBQIcNuWmPsO9447YjwE+qua/nECA1sa2Y16UzUVXsOlhRcWceSz+yTKDb6z/GbnaaukJ4va3j5CeBEc8IIhSZ6syCBDTqLvbdX7Jxw15ORpupLkJ7a9nmelNZEhjHPEkSN+32BTfw1Dx4FqBGb83cznt4oeB1lwi4Jjh8XykbvanPTRvBrv19F9aZypJASwRAi25KskuYEuK6vJxVhQmgZOLOE0VA+KBEBQRkPSKTGzJLBASh1zAw78nvFJFrvDM1c/k8qusEp9TfGQnMo6kjEjCRiqYilgiEC9yXkeivVPMYoiEe+6Kh5h8k7XQ6HQPnTffjD021owT4nYGl9ARDN64P9aTgJoAlAjWIKlecBt6AM8k+uL7/6YrQ2zqOkNXEOr5kHWOuy/izT5+rWbwHOFBDNtcT+VGhhvb6+ugcJhlYrkK6j3PeqU2ClGZCrRIJQ5zFU+AIH9ySnz9prFHX9lMZkvIVzx81ML0n0PrZ9mXOfr+Bt1z9tSCoZu3HKD3H+8ipIFziutx64LGKAUNnoT4jAgs5M+T6gXbFU1XNT+1xHeOn1Fdx55dzjC+4RwwfVnvLBM6Pj6/WxKrX+J2r42w+wC9MhBcZ4My1b/G4v+HDKKPgWohEuL+nnquRXu8fYpYOfgf/5vFJNTv06fulVVNWSFgicN47vY0Pzq95AfNSiXBFU5Xd1UXZgzuO/PykhmIPvzM1rM9E77Zb/N1FKL480bj10rt9F0sIlKOE8MSsPKHjJzemEL70XvnmjgSByWRBArHg4RTfXxwm9nchbyQKg74Z9beua2dDYXXuqmGmrzigU9kYqS7OXe3IdWWbqcxiFOEEbG8tq+yUKLGKpHWNUY5DmbnBKmvSqU1GNOibmIarFwch4A+lU0vEnXwarA3D+kIP5GQ5E2VxM65YtyPoKjlUVuaPgxOG0jLqEIFXWDtt8FGO44+pIAz0DlkPXl8+zHkbdsKw7z+I8g5P1/jaUeyicEM6uY5LCfDG2i4zHg2pcOvmBEz7Uo4HmVlMFkCI/AvgC0oPZP2iJY1BTkDAWlkko6EojAyNyVTkMq8DJgNyAgRivcyJlABfH9wy4zGfH0KBsExFLuNCHPRz9ZW8RlxmpTFICchWD2kEgemgTMWSjEIIKmV0hCT4XTQBrtUQ4T2w5MYuOBeLbosmEFtxCSsvOuREwyUSSHS2EjObwEpkPX7NtPcbXYl/1n0MGnriDYwxaeh2kraD59KzwtBP17tAucl/rXzP8nQHwtxvDTMf0ruQmUE89nzbmSa+dX4Qj2U8Nv4nytgwZmDvgUUmbtnM7vknsGyZsB3ZGbAzYGfAzoCdgZXIwP8jxLR10S6wwAAAAABJRU5ErkJggg==);
+      background-size: 100%;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+
+    .other .msg {
+      order: 1;
+      border-top-left-radius: 0px;
+    }
+    .other:before {
+      content: "";
+      position: relative;
+      top: 0px;
+      right: 0px;
+      left: 40px;
+      width: 0px;
+      height: 0px;
+      border: 5px solid #fff;
+      border-left-color: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .self {
+      justify-content: flex-end;
+      align-items: flex-end;
+    }
+    .self .msg {
+      order: 1;
+      border-bottom-right-radius: 0px;
+      box-shadow: 1px 2px 0px #D4D4D4;
+    }
+    .self .avatar {
+      order: 2;
+    }
+
+    .self .avatar:after {
+      content: "";
+      position: relative;
+      display: inline-block;
+      bottom: 19px;
+      right: 0px;
+      width: 0px;
+      height: 0px;
+      border: 5px solid #fff;
+      border-right-color: transparent;
+      border-top-color: transparent;
+      box-shadow: 0px 2px 0px #D4D4D4;
+    }
+
+    .msg {
+      border-width: 3px;
+      border-color: grey;
+      min-width: 50px;
+      padding: 10px;
+      border-radius: 2px;
+      box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.07);
+    }
+    .msg p {
+      font-size: 0.8rem;
+      margin: 0 0 0.2rem 0;
+      color: #777;
+    }
+    .msg time {
+      font-size: 0.7rem;
+      color: #ccc;
+      margin-top: 3px;
+      float: right;
+      cursor: default;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    .msg time:before {
+      content: "\f017";
+      color: #ddd;
+      font-family: FontAwesome;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .input-div {
+      position: fixed;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      height: 50px;
+      width: 100%;
+      z-index: 10;
+      font-weight: 400;
+      margin: 0px 1px;
+      overflow: hidden;
+    }
+    .submit-btn {
+      width: 80px;
+    }
+    .text-input {
+      height: 100%;
+      margin-right: 1px;
+      width: calc(100% - 80px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="border-bottom pt-3 menu-div">
+    <h1 id="title" class="text-center title-inactive">Tell <-\\-> Tell</h1>
+    <p class="p-1 text-center">
+      You're: <a class="text" id="name">unknown</a>
+    </p>
+  </div>
+  <div class="input-div input-group">
+    <input id="msg-input" type="text" class="border-0 text-input" placeholder="Type here!"/>
+    <button type="button" class="btn btn-primary submit-btn" onclick="send_message()">Submit</button>
+  </div>
+  <div class="history-div">
+    <div class="height-placeholder"></div>
+    <div class="container-fluid history-list">
+  </div>
+    <ol id="chat-list" class="chat">
+    </ol>
+  </div>
+  <template id="self-row">
+    <li class="self">
+      <div class="avatar me_avator _fill"></div>
+      <div class="msg">
+        <p class="_fill">msg content</p>
+        <time class="_fill">20:19</time>
       </div>
-    </div>
-    <div class="chatdiv input-group">
-      <input type="text" class="border-0 textinput" placeholder="Type here!"/>
-      <button type="button" class="btn btn-primary submit-btn">Submit</button>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/js/darkmode.min.js"></script>
-    <script src="js/ws.js"></script>
-    <script>
-      const table = document.getElementById("chat_msg_table");
-      function init_table_header() {
-        if (table.rows.length > 0) return
-        col=["sender", "is_public", "time", "content"]
-        // Create table header row using the extracted headers above.
-        let tr = table.insertRow(-1);                   // table row.
-        for (let i = 0; i < col.length; i++) {
-          let th = document.createElement("th");      // table header.
-          th.innerHTML = col[i];
-          tr.appendChild(th);
-        }
+    </li>
+  </template>
+  <template id="public-row">
+    <li class="other">
+      <div class="avatar public_avator _fill"></div>
+      <div class="msg">
+        <p class="_fill">msg content</p>
+        <time class="_fill">20:19</time>
+      </div>
+    </li>
+  </template>
+  <template id="other-row">
+    <li class="other">
+      <div class="avatar default_avator _fill"></div>
+      <div class="msg">
+        <p class="_fill">msg content</p>
+        <time class="_fill">20:19</time>
+      </div>
+    </li>
+  </template>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/js/darkmode.min.js"></script>
+  <script src="js/ws.js"></script>
+  <script>
+    // list
+    const list = document.getElementById("chat-list");
+    function reset_table() {
+      list.replaceChildren()
+    }
+    function _get_time_diff(dateTimeStamp){
+    	var minute = 1000 * 60;
+    	var hour = minute * 60;
+    	var day = hour * 24;
+    	var halfamonth = day * 15;
+    	var month = day * 30;
+    	var now = new Date().getTime();
+    	var diffValue = now - dateTimeStamp;
+    	if(diffValue < 0){return;}
+    	var monthC =diffValue/month;
+    	var weekC =diffValue/(7*day);
+    	var dayC =diffValue/day;
+    	var hourC =diffValue/hour;
+    	var minC =diffValue/minute;
+    	if(monthC>=1){
+    		result="" + parseInt(monthC) + "月前";
+    	}else if(weekC>=1){
+    		result="" + parseInt(weekC) + "周前";
+    	}else if(dayC>=1){
+    		result=""+ parseInt(dayC) +"天前";
+    	}else if(hourC>=1){
+    		result=""+ parseInt(hourC) +"小时前";
+    	}else if(minC>=1){
+    		result=""+ parseInt(minC) +"分钟前";
+    	}else{
+        result="刚刚";
       }
+    	return result;
+    }
+    function _parse_time(timepoint) {
+      let tp = new Date(timepoint)
+      return _get_time_diff(tp.getTime())
+    }
+    function _add_row_self(message) {
+      let template = document.getElementById('self-row');
+      // Clone the new row and insert it into the table
+      let clone = template.content.cloneNode(true);
+      // username, msg, time
+      let fills = clone.querySelectorAll("._fill");
+      if (message.from) fills[0].setAttribute('dt-from', message.from);
+      if (message.content) fills[1].innerText = message.content;
+      if (message.sent_time) fills[2].innerText = _parse_time(message.sent_time);
+      list.appendChild(clone);
+    }
+    function _add_row_other(message) {
+      let template = document.getElementById('other-row');
+      // Clone the new row and insert it into the table
+      let clone = template.content.cloneNode(true);
+      // username, msg, time
+      let fills = clone.querySelectorAll("._fill");
+      if (message.from) fills[0].setAttribute('dt-from', message.from);
+      if (message.content) fills[1].innerText = message.content;
+      if (message.sent_time) fills[2].innerText = _parse_time(message.sent_time);
+      list.appendChild(clone);
+    }
+    function _add_row_pubic(message) {
+      let template = document.getElementById('pubic-row');
+      // Clone the new row and insert it into the table
+      let clone = template.content.cloneNode(true);
+      // username, msg, time
+      let fills = clone.querySelectorAll("._fill");
+      if (message.from) fills[0].setAttribute('dt-from', message.from);
+      if (message.content) fills[1].innerText = message.content;
+      if (message.sent_time) fills[2].innerText = _parse_time(message.sent_time);
+      list.appendChild(clone);
+    }
+    function add_row(message) {
+      if (message.sent_by_me) {
+        // add self
+        _add_row_self(message)
+      } else if (message.is_public) {
+        // add public
+        _add_row_public(message)
+      } else {
+        // add other
+        _add_row_other(message)
+      }
+    }
+    function add_rows(messages) {
+      for (let i = 0; i < messages.length; i++) {
+        add_row(messages[i])
+      }
+    }
 
-      function clear_table() {
-        table.replaceChildren()
+    // send message
+    function send_message() {
+      let msg = document.getElementById("msg-input")
+      if (msg.value.length == 0) {
+        alert("msg input is empty")
+        return
       }
+      let to = '';
+      ws_mgr.send(msg.value, to);
+      msg.value = '';
+    }
 
-      function reset_table() {
-        clear_table()
-        init_table_header()
-      }
+    // some event handlers
+    function set_display_username(name) {
+      document.getElementById('name').innerText = name
+    }
+    function set_title_inactive(classname) {
+      let target = document.getElementById('title')
+      target.classList.remove('title-inactive', 'title-active')
+      target.classList.add('title-inactive')
+    }
+    function set_title_active(classname) {
+      let target = document.getElementById('title')
+      target.classList.remove('title-inactive', 'title-active')
+      target.classList.add('title-active')
+    }
+    darkmode.setDarkMode(true);
+    reset_table();
+    message_callback.on_set_username = (name) => {
+      set_title_active()
+      set_display_username(name)
+    }
+    message_callback.on_add_msg = (msg) => { add_rows([msg]) }
+    message_callback.on_reset_msg = () => {
+      reset_table()
+      set_display_username(name)
+    }
+    message_callback.on_connection_lost = () => {
+      set_title_inactive()
+    }
+    ws_mgr = init_message_ws();
+  </script>
+</body>
 
-      function add_rows(messages) {
-        col = ["from", "is_public", "sent_time", "content"]
-        for (let i = 0; i < messages.length; i++) {
-          tr = table.insertRow(-1);
-          for (let j = 0; j < col.length; j++) {
-            let tabCell = tr.insertCell(-1);
-            tabCell.innerHTML = messages[i][col[j]];
-          }
-        }
-      }
-      function set_display_username(name) {
-        document.getElementById('name').innerText = name
-      }
-      function set_title_inactive(classname) {
-        let target = document.getElementById('title')
-        target.classList.remove('title-inactive', 'title-active')
-        target.classList.add('title-inactive')
-      }
-      function set_title_active(classname) {
-        let target = document.getElementById('title')
-        target.classList.remove('title-inactive', 'title-active')
-        target.classList.add('title-active')
-      }
-      darkmode.setDarkMode(true);
-      reset_table();
-      message_callback.on_set_username = (name)=>{
-        set_title_active()
-        set_display_username(name)
-      }
-      message_callback.on_add_msg = (msg)=>{add_rows([msg])}
-      message_callback.on_reset_msg = ()=>{
-        reset_table()
-        set_display_username(name)
-      }
-      message_callback.on_connection_lost = ()=>{
-        set_title_inactive()
-      }
-      init_message_ws();
-    </script>
-  </body>
 </html>
