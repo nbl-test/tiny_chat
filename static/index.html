@@ -279,7 +279,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/js/darkmode.min.js"></script>
   <script src="js/ws.js"></script>
   <script>
-    // 平滑的滚动到底部
+    // smooth scroll
     const scrollToBottom = (element) =>
       element.scrollIntoView({ behavior: "smooth", block: "end" });
     // list
@@ -301,18 +301,28 @@
       var dayC = diffValue / day;
       var hourC = diffValue / hour;
       var minC = diffValue / minute;
-      if (monthC >= 1) {
-        result = "" + parseInt(monthC) + "月前";
-      } else if (weekC >= 1) {
-        result = "" + parseInt(weekC) + "周前";
-      } else if (dayC >= 1) {
-        result = "" + parseInt(dayC) + "天前";
-      } else if (hourC >= 1) {
-        result = "" + parseInt(hourC) + "小时前";
-      } else if (minC >= 1) {
-        result = "" + parseInt(minC) + "分钟前";
+      if (monthC > 1) {
+        result = "" + parseInt(monthC) + "monthes ago";
+      } else if (monthC == 1) {
+        result = "" + parseInt(monthC) + "month agg";
+      } else if (weekC > 1) {
+        result = "" + parseInt(weekC) + "weeks ago";
+      } else if (weekC == 1) {
+        result = "" + parseInt(weekC) + "week ago";
+      } else if (dayC > 1) {
+        result = "" + parseInt(dayC) + "days ago";
+      } else if (dayC == 1) {
+        result = "" + parseInt(dayC) + "day ago";
+      } else if (hourC > 1) {
+        result = "" + parseInt(hourC) + "hours ago";
+      } else if (hourC == 1) {
+        result = "" + parseInt(hourC) + "hour ago";
+      } else if (minC > 1) {
+        result = "" + parseInt(minC) + "minutes ago";
+      } else if (minC == 1) {
+        result = "" + parseInt(minC) + "minute ago";
       } else {
-        result = "刚刚";
+        result = "just now";
       }
       return result;
     }
