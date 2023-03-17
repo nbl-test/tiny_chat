@@ -52,6 +52,7 @@ func generateChatHandler(hdl func(inputMsg string) (string, error)) MessageHandl
 		if time.Since(sentTime) > 10*time.Second {
 			return nil
 		}
+		log.Println("got: ", msg.Content)
 		out, err := hdl(msg.Content)
 		if err != nil {
 			out = fmt.Sprintf("some error happened: %v", err)
@@ -87,43 +88,44 @@ func main() {
 	if err != nil {
 		log.Fatal("Invalid WS_URL:", err)
 	}
-	log.Printf("connecting to %s", u.String())
-
-	// Connect to websocket server
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		log.Fatal("dial:", err)
-	}
-	defer c.Close()
-
-	done := make(chan struct{})
-
-	// Read messages from server
-	go func() {
-		defer close(done)
-		for {
-			mt, message, err := c.ReadMessage()
-			if err != nil {
-				log.Println("read:", err)
-				return
-			}
-			if mt != websocket.TextMessage {
-				continue
-			}
-			log.Printf("recv: %s", message)
-
-			err = handler(c, message)
-			if err != nil {
-				log.Println("handler:", err)
-				return
-			}
-		}
-	}()
-
 	for {
+		log.Printf("connecting to %s", u.String())
+		// Connect to websocket server
+		c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+		if err != nil {
+			log.Println("dial:", err)
+			time.Sleep(5 * time.Second) // Wait for 5 seconds before retrying
+			continue
+		}
+		defer c.Close()
+
+		done := make(chan struct{})
+
+		// Read messages from server
+		go func() {
+			defer close(done)
+			for {
+				mt, message, err := c.ReadMessage()
+				if err != nil {
+					log.Println("read:", err)
+					return
+				}
+				if mt != websocket.TextMessage {
+					continue
+				}
+				// log.Printf("recv: %s", message)
+
+				err = handler(c, message)
+				if err != nil {
+					log.Println("handler:", err)
+					return
+				}
+			}
+		}()
+
 		select {
 		case <-done:
-			return
+			time.Sleep(5 * time.Second) // Wait for 5 seconds before retrying
 		case <-interrupt:
 			log.Println("interrupt")
 
