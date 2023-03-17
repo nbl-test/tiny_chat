@@ -48,8 +48,11 @@ func main() {
 	}
 
 	// prepare client
-	done3 := startDefaultClient(port)
-	defer close(done3)
+	_, found := os.LookupEnv("ENABLE_BOT")
+	if found {
+		done3 := startDefaultClient(port)
+		defer close(done3)
+	}
 
 	// set server
 	r := gin.Default()
