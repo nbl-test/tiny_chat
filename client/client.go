@@ -94,7 +94,12 @@ func main() {
 		c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 		if err != nil {
 			log.Println("dial:", err)
-			time.Sleep(5 * time.Second) // Wait for 5 seconds before retrying
+			select {
+			case <-interrupt:
+				log.Println("interrupt")
+				return
+			case <-time.After(5 * time.Second): // Wait for 5 seconds before retrying
+			}
 			continue
 		}
 		defer c.Close()
