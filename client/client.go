@@ -40,7 +40,7 @@ func generateChatHandler(hdl func(inputMsg string) (string, error)) MessageHandl
 			selfName = msg.Name
 			return nil
 		}
-		if selfName == "" || len(msg.Content) == 0 {
+		if selfName == "" || selfName == msg.From || len(msg.Content) == 0 {
 			return nil
 		}
 		// msg is content msg, and has id info
