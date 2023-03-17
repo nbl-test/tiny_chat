@@ -92,7 +92,11 @@ func main() {
 	signal.Notify(interrupt, os.Interrupt)
 
 	hdlType := os.Getenv("HDL_TYPE")
-	var handler MessageHandler = generateChatHandler(handlerManager[hdlType])
+	hdl, found := handlerManager[hdlType]
+	if !found {
+		hdl = defaultHandler
+	}
+	var handler MessageHandler = generateChatHandler(hdl)
 
 	// Use environment variable WS_URL as websocket server address
 	wsURL, ok := os.LookupEnv("WS_URL")
