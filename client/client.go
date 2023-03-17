@@ -73,11 +73,26 @@ func defaultHandler(inputMsg string) (string, error) {
 	return "hello", nil
 }
 
+var handlerManager = map[string]func(inputMsg string) (string, error){
+	"": defaultHandler,
+}
+
+func setHandler(name string, hdl func(inputMsg string) (string, error)) {
+	if hdl == nil {
+		return
+	}
+	if name == "" {
+		return
+	}
+	handlerManager[name] = hdl
+}
+
 func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	var handler MessageHandler = generateChatHandler(defaultHandler)
+	hdlType := os.Getenv("HDL_TYPE")
+	var handler MessageHandler = generateChatHandler(handlerManager[hdlType])
 
 	// Use environment variable WS_URL as websocket server address
 	wsURL, ok := os.LookupEnv("WS_URL")
