@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/BeanLiu1994/tiny_chat/chat"
+	"github.com/BeanLiu1994/tiny_chat/client/client"
 	"github.com/BeanLiu1994/tiny_chat/ws"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,16 @@ func main() {
 		defer close(done2)
 	}
 
+	// port env
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	// prepare client
+	done3 := startDefaultClient(port)
+	defer close(done3)
+
 	// set server
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -52,9 +63,15 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		http.Redirect(c.Writer, c.Request, "/static/", http.StatusTemporaryRedirect)
 	})
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
 	r.Run(":" + port) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+}
+
+func startDefaultClient(port string) chan os.Signal {
+	done := make(chan os.Signal)
+	go func() {
+		time.Sleep(time.Second * 5)
+		// add client
+		client.StartClient("ws://127.0.0.1:"+port+"/chat", "gpt_proxy", done)
+	}()
+	return done
 }

@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"os/signal"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -25,7 +24,7 @@ type MsgType struct {
 
 var selfName string
 
-func generateChatHandler(hdl func(inputMsg string) (string, error)) MessageHandler {
+func GenerateChatHandler(hdl func(inputMsg string) (string, error)) MessageHandler {
 	if hdl == nil {
 		return nil
 	}
@@ -87,26 +86,21 @@ func setHandler(name string, hdl func(inputMsg string) (string, error)) {
 	handlerManager[name] = hdl
 }
 
-func main() {
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
-
-	hdlType := os.Getenv("HDL_TYPE")
-	hdl, found := handlerManager[hdlType]
+func GetHandler(name string) func(inputMsg string) (string, error) {
+	ret, found := handlerManager[name]
 	if !found {
-		hdl = defaultHandler
+		return defaultHandler
 	}
-	var handler MessageHandler = generateChatHandler(hdl)
+	return ret
+}
 
-	// Use environment variable WS_URL as websocket server address
-	wsURL, ok := os.LookupEnv("WS_URL")
-	if !ok {
-		log.Fatal("WS_URL environment variable not set")
-	}
+func StartClient(wsURL, handlerType string, interrupt chan os.Signal) {
 	u, err := url.Parse(wsURL)
 	if err != nil {
 		log.Fatal("Invalid WS_URL:", err)
 	}
+	// Prepare handler
+	handler := GenerateChatHandler(GetHandler(handlerType))
 	for {
 		log.Printf("connecting to %s", u.String())
 		// Connect to websocket server
