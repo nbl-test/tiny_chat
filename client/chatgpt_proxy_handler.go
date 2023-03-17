@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func init() {
@@ -14,8 +17,10 @@ func init() {
 func chatgptProxyHandler(inputMsg string) (string, error) {
 	// Create a map[string]interface{} for the body
 	bodyData := map[string]interface{}{
-		"key1": "value1",
-		"key2": "value2",
+		"model": "gpt-3.5-turbo",
+		"messages": []interface{}{
+			map[string]interface{}{"role": "user", "content": inputMsg},
+		},
 	}
 
 	// Convert the map to JSON
@@ -25,7 +30,7 @@ func chatgptProxyHandler(inputMsg string) (string, error) {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest(http.MethodGet, "https://chatgpt-api.shn.hk/v1/", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest(http.MethodPost, "https://chatgpt-api.shn.hk/v1/", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", err
 	}
@@ -47,9 +52,14 @@ func chatgptProxyHandler(inputMsg string) (string, error) {
 	type reply struct {
 		Error error
 	}
-
 	var r reply
-	err = json.NewDecoder(resp.Body).Decode(&r)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	bodyBytes = []byte(strings.TrimPrefix(string(bodyBytes), "OpenAI API responded:"))
+	fmt.Println("response is", string(bodyBytes))
+	err = json.Unmarshal(bodyBytes, &r)
 	if err != nil {
 		return "", err
 	}
