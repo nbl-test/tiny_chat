@@ -118,6 +118,7 @@ func main() {
 			continue
 		}
 		defer c.Close()
+		log.Printf("connected to %s", u.String())
 
 		done := make(chan struct{})
 
