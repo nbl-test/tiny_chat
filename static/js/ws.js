@@ -97,19 +97,19 @@ function init_ws(url, events) {
         let e = ()=>{}
         ws.onopen = (event) => {
             console.log(event);
-            (events['onopen']||e)(event)
+            (events['onopen']||e)(ws, event)
         };
         ws.onmessage = (event) => {
             console.log(event.data);
-            (events['onmessage']||e)(event)
+            (events['onmessage']||e)(ws, event)
         }
         ws.onerror = (event) => {
             console.log(event);
-            (events['onerror']||e)(event)
+            (events['onerror']||e)(ws, event)
         }
         ws.onclose = (event) => {
             console.log(event);
-            (events['onclose']||e)(event)
+            (events['onclose']||e)(ws, event)
         }
     }
     return {
@@ -126,13 +126,17 @@ function init_message_ws() {
     const url = new URL('/chat', location.href);
     url.protocol = 'wss';
     return init_ws(url, {
-        'onopen': (event)=>{
+        'onopen': (ws, event)=>{
             reset_messages();
         },
-        'onmessage': (event)=>{
+        'onmessage': (ws, event)=>{
             let msg = JSON.parse(event.data)
             if ('error' in msg) {
                 alert('error occured: ' + msg)
+                return
+            }
+            if ('_' in msg) {
+                ws.send(JSON.stringify({'_': "heartbeat"}))
                 return
             }
             if ('name' in msg) {
@@ -144,10 +148,10 @@ function init_message_ws() {
                 return
             }
         },
-        'onerror': (event)=>{
+        'onerror': (ws, event)=>{
             
         },
-        'onclose': (event)=>{
+        'onclose': (ws, event)=>{
             connection_closed(event)
         },
     })

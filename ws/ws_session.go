@@ -105,14 +105,18 @@ func WsChat(c *gin.Context) {
 			continue
 		}
 		type tmpStruct struct {
-			To      string `json:"to"`
-			Content string `json:"content"`
+			HEARTBEAT string `json:"_"`
+			To        string `json:"to"`
+			Content   string `json:"content"`
 		}
 		tmp := tmpStruct{}
 		err = json.Unmarshal(message, &tmp)
 		if err != nil {
 			log.Println("parse:", err)
 			session.SendJsonErr(sess, "unmarshal input message failed")
+			continue
+		}
+		if tmp.HEARTBEAT != "" {
 			continue
 		}
 		if tmp.Content == "" {
