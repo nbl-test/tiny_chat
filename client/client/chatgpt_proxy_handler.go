@@ -14,6 +14,31 @@ func init() {
 	setHandler("gpt_proxy", chatgptProxyHandler)
 }
 
+// {"id":"chatcmpl-6viCY5M91KBSHAwYTMTSCB8sho5la","object":"chat.completion","created":1679212626,"model":"gpt-3.5-turbo-0301","usage":{"prompt_tokens":13,"completion_tokens":33,"total_tokens":46},"choices":[{"message":{"role":"assistant","content":"\n\nAs an AI language model, I do not have emotions or feelings, but I am functioning well. Thank you for asking. How can I assist you today?"},"finish_reason":"stop","index":0}]}
+type ChatCompletion struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int    `json:"created"`
+	Model   string `json:"model"`
+	Usage   struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
+	} `json:"usage"`
+	Choices []struct {
+		Message struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"message"`
+		FinishReason string `json:"finish_reason"`
+		Index        int    `json:"index"`
+	} `json:"choices"`
+	Error struct {
+		Message string `json:"message"`
+		Type    string `json:"type"`
+	} `json:"error"`
+}
+
 func chatgptProxyHandler(inputMsg string) (string, error) {
 	// Create a map[string]interface{} for the body
 	bodyData := map[string]interface{}{
@@ -45,14 +70,7 @@ func chatgptProxyHandler(inputMsg string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	type error struct {
-		Message string
-		Type    string
-	}
-	type reply struct {
-		Error error
-	}
-	var r reply
+	var r ChatCompletion
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
@@ -66,5 +84,8 @@ func chatgptProxyHandler(inputMsg string) (string, error) {
 	if r.Error.Message != "" {
 		return "", errors.New(r.Error.Message)
 	}
-	return "nothing to say", nil
+	if len(r.Choices) == 0 {
+		return "nothing to say", nil
+	}
+	return r.Choices[0].Message.Content, nil
 }
