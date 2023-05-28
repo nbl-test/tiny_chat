@@ -11,6 +11,8 @@ import (
 	"github.com/BeanLiu1994/tiny_chat/ws"
 
 	"github.com/gin-gonic/gin"
+
+	hideMyAssParsing "github.com/veksa/hide-my-ass-parsing"
 )
 
 func main() {
@@ -59,6 +61,11 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
+		})
+	})
+	r.GET("/hma", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"proxies": hideMyAssParsing.GetProxies(),
 		})
 	})
 	r.GET("/chat", ws.WsChat)
